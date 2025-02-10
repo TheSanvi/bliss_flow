@@ -33,13 +33,13 @@ class MyApp extends StatelessWidget {
       routes: {
         '/': (context) => SplashScreen(),
         '/home': (context) => HomeScreen(),
-      //   '/journaling': (context) => JournalingScreen(),
-      //   '/meditation': (context) => MeditationScreen(),
-      //   '/hydration': (context) => HydrationScreen(),
+
+        '/meditation': (context) => MeditationScreen(),
+        '/hydration': (context) => HydrationScreen(),
         '/mood': (context) => MoodScreen(),
-      //   '/profile': (context) => ProfileScreen(),
-      //   '/settings': (context) => SettingsScreen(),
-      //   '/emergency': (context) => EmergencyScreen(),
+        '/profile': (context) => ProfileScreen(),
+        '/settings': (context) => SettingsScreen(),
+        '/emergency': (context) => EmergencyScreen(),
       },
     );
   }

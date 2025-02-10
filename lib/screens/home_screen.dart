@@ -1,4 +1,9 @@
+import 'package:bliss_flow/screens/emergency_screen.dart';
+import 'package:bliss_flow/screens/hydration_screen.dart';
 import 'package:bliss_flow/screens/journaling_screen.dart';
+import 'package:bliss_flow/screens/profile_screen.dart';
+import 'package:bliss_flow/screens/settings_screen.dart';
+import 'package:bliss_flow/screens/sleep_tracking_Screen.dart';
 import 'package:flutter/material.dart';
 import 'package:bliss_flow/widgets/bottom_nav_bar.dart';
 import 'package:bliss_flow/screens/mood_screen.dart';
@@ -20,6 +25,9 @@ class _HomeScreenState extends State<HomeScreen> {
   final List<Widget> _screens = [
     HomeScreenContent(),
     MoodScreen(),
+    ProfileScreen(),
+    SettingsScreen(),
+    EmergencyScreen(),
   ];
 
   void _onTabTapped(int index) {
@@ -106,13 +114,13 @@ class HomeScreenContent extends StatelessWidget {
               alignment: WrapAlignment.spaceBetween,
               children: [
                 _buildQuickActionCard(
-                    context, 'Journal', Icons.edit_note, 'Write your thoughts', Colors.blue, const JournalScreen()),
+                    context, 'Journal', Icons.edit_note, 'Write your thoughts', Colors.blue,  JournalScreen()),
                 _buildQuickActionCard(
                     context, 'Meditate', Icons.self_improvement, '10 min session', Colors.purple, const MeditationScreen()),
-                // _buildQuickActionCard(
-                //     context, 'Hydration', Icons.water_drop, 'Track water intake', Colors.cyan, const HydrationScreen()),
-                // _buildQuickActionCard(
-                //     context, 'Sleep', Icons.bedtime, 'Track sleep quality', Colors.indigo, const SleepScreen()),
+                _buildQuickActionCard(
+                    context, 'Hydration', Icons.water_drop, 'Track water intake', Colors.cyan, const HydrationScreen()),
+                _buildQuickActionCard(
+                    context, 'Sleep', Icons.bedtime, 'Track sleep quality', Colors.indigo, const SleepScreen()),
               ],
             ),
             const SizedBox(height: 24),
