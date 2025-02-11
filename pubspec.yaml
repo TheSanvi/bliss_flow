@@ -36,6 +36,8 @@ dependencies:
   cupertino_icons: ^1.0.8
   lottie: ^3.3.1
   sqflite: ^2.4.1
+  url_launcher: ^6.3.1
+  shared_preferences: ^2.5.2
 
 dev_dependencies:
   flutter_test:
@@ -60,9 +62,9 @@ flutter:
   uses-material-design: true
 
   # To add assets to your application, add an assets section, like this:
-  # assets:
-  #   - images/a_dot_burr.jpeg
-  #   - images/a_dot_ham.jpeg
+#  assets:
+#     - assests/DALL·E 2025-02-10 14.39.23 - A cute, non-human avatar with a transparent or plain background. The character is a soft, rounded, and friendly creature with no human-like features. .png
+
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images

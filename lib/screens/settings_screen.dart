@@ -1,7 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
 
-class SettingsScreen extends StatelessWidget {
+class SettingsScreen extends StatefulWidget {
   const SettingsScreen({Key? key}) : super(key: key);
+
+  @override
+  _SettingsScreenState createState() => _SettingsScreenState();
+}
+
+class _SettingsScreenState extends State<SettingsScreen> {
+  bool _darkMode = false;
+  String _selectedLanguage = "English";
 
   @override
   Widget build(BuildContext context) {
@@ -15,37 +24,34 @@ class SettingsScreen extends StatelessWidget {
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
-          // Account Settings
           _buildSettingsSection("Account Settings", [
-            _buildSettingsTile(Icons.lock, "Change Password"),
-            _buildSettingsTile(Icons.person, "Edit Profile"),
-            _buildSettingsTile(Icons.privacy_tip, "Privacy Settings"),
+            _buildSettingsTile(Icons.lock, "Change Password", _showChangePasswordDialog),
+            _buildSettingsTile(Icons.person, "Edit Profile", _showEditProfileDialog),
+            _buildSettingsTile(Icons.privacy_tip, "Privacy Settings", () {}),
           ]),
 
-          // Notifications
-          _buildSettingsSection("Notifications", [
-            _buildSettingsTile(Icons.notifications, "Notification Preferences"),
-            _buildSettingsTile(Icons.do_not_disturb, "Do Not Disturb Mode"),
+          _buildSettingsSection("Preferences", [
+            _buildDarkModeToggle(),
+            _buildLanguageSelection(),
+            _buildSettingsTile(Icons.color_lens, "Theme & Appearance", () {}),
           ]),
 
-          // App Preferences
-          _buildSettingsSection("App Preferences", [
-            _buildSettingsTile(Icons.color_lens, "Theme & Appearance"),
-            _buildSettingsTile(Icons.language, "Language"),
-            _buildSettingsTile(Icons.info_outline, "About App"),
+          _buildSettingsSection("About", [
+            _buildSettingsTile(Icons.info_outline, "About App", () {}),
           ]),
 
           const SizedBox(height: 20),
 
-          // Logout Button
           Center(
-            child: TextButton.icon(
-              onPressed: () {
-                // Logout function
-              },
-              icon: const Icon(Icons.exit_to_app, color: Colors.red),
-              label: const Text("Logout",
-                  style: TextStyle(color: Colors.red, fontSize: 16)),
+            child: ElevatedButton.icon(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.red,
+                padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 20),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+              ),
+              onPressed: _showLogoutDialog,
+              icon: const Icon(Icons.exit_to_app, color: Colors.white),
+              label: const Text("Logout", style: TextStyle(color: Colors.white, fontSize: 16)),
             ),
           ),
         ],
@@ -53,17 +59,13 @@ class SettingsScreen extends StatelessWidget {
     );
   }
 
-  // Section Title
   Widget _buildSettingsSection(String title, List<Widget> tiles) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Padding(
           padding: const EdgeInsets.only(bottom: 8, top: 16),
-          child: Text(
-            title,
-            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-          ),
+          child: Text(title, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
         ),
         Container(
           decoration: BoxDecoration(
@@ -76,15 +78,102 @@ class SettingsScreen extends StatelessWidget {
     );
   }
 
-  // Settings Tile
-  Widget _buildSettingsTile(IconData icon, String title) {
+  Widget _buildSettingsTile(IconData icon, String title, VoidCallback onTap) {
     return ListTile(
       leading: Icon(icon, color: Colors.purple),
       title: Text(title),
       trailing: const Icon(Icons.arrow_forward_ios, size: 16),
-      onTap: () {
-        // Navigate to respective screen
+      onTap: onTap,
+    );
+  }
+
+  Widget _buildDarkModeToggle() {
+    return SwitchListTile(
+      title: const Text("Dark Mode"),
+      secondary: const Icon(Icons.dark_mode, color: Colors.purple),
+      value: _darkMode,
+      onChanged: (value) {
+        setState(() {
+          _darkMode = value;
+        });
       },
+    );
+  }
+
+  Widget _buildLanguageSelection() {
+    return ListTile(
+      leading: const Icon(Icons.language, color: Colors.purple),
+      title: const Text("Language"),
+      trailing: DropdownButton<String>(
+        value: _selectedLanguage,
+        onChanged: (String? newValue) {
+          setState(() {
+            _selectedLanguage = newValue!;
+          });
+        },
+        items: ["English", "Hindi", "Spanish", "French"]
+            .map<DropdownMenuItem<String>>((String value) {
+          return DropdownMenuItem<String>(
+            value: value,
+            child: Text(value),
+          );
+        }).toList(),
+      ),
+    );
+  }
+
+  void _showChangePasswordDialog() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text("Change Password"),
+        content: const Text("Feature coming soon!"),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text("OK"),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showEditProfileDialog() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text("Edit Profile"),
+        content: const Text("Feature coming soon!"),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text("OK"),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showLogoutDialog() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text("Logout"),
+        content: const Text("Are you sure you want to logout?"),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text("Cancel"),
+          ),
+          TextButton(
+            onPressed: () {
+              // Perform logout
+              Navigator.pop(context);
+            },
+            child: const Text("Logout", style: TextStyle(color: Colors.red)),
+          ),
+        ],
+      ),
     );
   }
 }

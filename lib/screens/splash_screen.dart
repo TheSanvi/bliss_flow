@@ -1,3 +1,4 @@
+import 'package:bliss_flow/screens/UserDetailsScreen.dart';
 import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
 import 'package:bliss_flow/screens/home_screen.dart'; // Ensure this import is correct
@@ -32,7 +33,7 @@ class _SplashScreenState extends State<SplashScreen>
     Future.delayed(const Duration(seconds: 3), () {
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (context) => const HomeScreen()),
+        MaterialPageRoute(builder: (context) => UserDetailsScreen()),
       );
     });
   }
@@ -74,7 +75,7 @@ class _SplashScreenState extends State<SplashScreen>
                 ScaleTransition(
                   scale: _scaleAnimation,
                   child: Lottie.asset(
-                    'assets/animations/splash_animation.json',
+                    'assests/DALL·E 2025-02-10 14.39.23 - A cute, non-human avatar with a transparent or plain background. The character is a soft, rounded, and friendly creature with no human-like features. .png',
                     width: 180,
                     height: 180,
                     fit: BoxFit.cover,
