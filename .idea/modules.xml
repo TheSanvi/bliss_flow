@@ -3,6 +3,7 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/bliss_flow.iml" filepath="$PROJECT_DIR$/bliss_flow.iml" />
+      <module fileurl="file://$PROJECT_DIR$/android/bliss_flow_android.iml" filepath="$PROJECT_DIR$/android/bliss_flow_android.iml" />
     </modules>
   </component>
 </project>

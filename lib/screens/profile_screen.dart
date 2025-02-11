@@ -1,7 +1,15 @@
 import 'package:flutter/material.dart';
 
-class ProfileScreen extends StatelessWidget {
+class ProfileScreen extends StatefulWidget {
   const ProfileScreen({Key? key}) : super(key: key);
+
+  @override
+  _ProfileScreenState createState() => _ProfileScreenState();
+}
+
+class _ProfileScreenState extends State<ProfileScreen> {
+  String username = "Your Name";
+  String bio = "Write something about yourself...";
 
   @override
   Widget build(BuildContext context) {
@@ -9,102 +17,73 @@ class ProfileScreen extends StatelessWidget {
       appBar: AppBar(
         title: const Text("Profile"),
         centerTitle: true,
-        backgroundColor: Colors.purple,
-        elevation: 0,
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            // User Info (Without Avatar)
-            const Text(
-              "Jane Doe",
-              style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
-            ),
-            Text("janedoe@gmail.com",
-                style: TextStyle(color: Colors.grey[600], fontSize: 16)),
-            const SizedBox(height: 12),
-
-            // Edit Profile Button
-            ElevatedButton.icon(
-              onPressed: () {
-                // Edit profile action
+            GestureDetector(
+              onTap: () {
+                // Profile image change functionality
               },
-              icon: const Icon(Icons.edit, size: 16),
-              label: const Text("Edit Profile"),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.purple,
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12)),
+              child: CircleAvatar(
+                radius: 50,
+                backgroundImage: AssetImage("assets/profile_default.png"),
               ),
             ),
-            const SizedBox(height: 24),
-
-            // Account Settings Section
-            _buildSettingsSection("Account Settings", [
-              _buildSettingsTile(Icons.lock, "Change Password"),
-              _buildSettingsTile(Icons.notifications, "Notification Settings"),
-              _buildSettingsTile(Icons.privacy_tip, "Privacy Settings"),
-            ]),
-
-            // App Settings Section
-            _buildSettingsSection("App Settings", [
-              _buildSettingsTile(Icons.color_lens, "Theme & Appearance"),
-              _buildSettingsTile(Icons.help_outline, "Help & Support"),
-            ]),
-
-            const SizedBox(height: 24),
-
-            // Logout Button
-            Center(
-              child: TextButton.icon(
-                onPressed: () {
-                  // Logout action
-                },
-                icon: const Icon(Icons.exit_to_app, color: Colors.red),
-                label: const Text("Logout",
-                    style: TextStyle(color: Colors.red, fontSize: 16)),
+            const SizedBox(height: 16),
+            TextField(
+              decoration: InputDecoration(
+                labelText: "Username",
+                border: OutlineInputBorder(),
               ),
+              onChanged: (value) {
+                setState(() {
+                  username = value;
+                });
+              },
+            ),
+            const SizedBox(height: 12),
+            TextField(
+              decoration: InputDecoration(
+                labelText: "Bio",
+                border: OutlineInputBorder(),
+              ),
+              onChanged: (value) {
+                setState(() {
+                  bio = value;
+                });
+              },
+            ),
+            const SizedBox(height: 20),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                Column(
+                  children: [
+                    Icon(Icons.local_fire_department, color: Colors.red, size: 32),
+                    Text("7-Day Streak")
+                  ],
+                ),
+                Column(
+                  children: [
+                    Icon(Icons.emoji_emotions, color: Colors.yellow, size: 32),
+                    Text("Mood Insights")
+                  ],
+                ),
+              ],
+            ),
+            const SizedBox(height: 24),
+            ElevatedButton(
+              onPressed: () {
+                // Save profile functionality
+              },
+              child: const Text("Save Profile"),
             ),
           ],
         ),
       ),
-    );
-  }
-
-  // Settings Section Title
-  Widget _buildSettingsSection(String title, List<Widget> tiles) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Padding(
-          padding: const EdgeInsets.only(bottom: 8, top: 16),
-          child: Text(
-            title,
-            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-          ),
-        ),
-        Container(
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(12),
-            color: Colors.grey[100],
-          ),
-          child: Column(children: tiles),
-        ),
-      ],
-    );
-  }
-
-  // Settings Tile
-  Widget _buildSettingsTile(IconData icon, String title) {
-    return ListTile(
-      leading: Icon(icon, color: Colors.purple),
-      title: Text(title),
-      trailing: const Icon(Icons.arrow_forward_ios, size: 16),
-      onTap: () {
-        // Navigate to respective screen
-      },
     );
   }
 }
