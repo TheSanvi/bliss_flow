@@ -118,7 +118,7 @@ class HomeScreenContent extends StatelessWidget {
                 _buildQuickActionCard(
                     context, 'Meditate', Icons.self_improvement, '10 min session', Colors.purple, const MeditationScreen()),
                 _buildQuickActionCard(
-                    context, 'Hydration', Icons.water_drop, 'Track water intake', Colors.cyan, const HydrationScreen()),
+                    context, 'Hydration', Icons.water_drop, 'Track water intake', Colors.cyan,  HydrationScreen()),
                 _buildQuickActionCard(
                     context, 'Sleep', Icons.bedtime, 'Track sleep quality', Colors.indigo, const SleepScreen()),
               ],
