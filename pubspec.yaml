@@ -41,6 +41,9 @@ dependencies:
   fl_chart: ^0.70.2
   flutter_svg: ^2.0.17
   google_fonts: ^6.2.1
+  audioplayers: ^6.2.0
+  percent_indicator: ^4.2.4
+  intl: ^0.20.2
 
 dev_dependencies:
   flutter_test:
@@ -65,8 +68,9 @@ flutter:
   uses-material-design: true
 
   # To add assets to your application, add an assets section, like this:
-#  assets:
-#     - assests/DALL·E 2025-02-10 14.39.23 - A cute, non-human avatar with a transparent or plain background. The character is a soft, rounded, and friendly creature with no human-like features. .png
+  assets:
+     - assests/Animation - 1740593647235.json
+     - assests/Animation - 1740595749959.json
 
 
   # An image asset can refer to one or more resolution-specific "variants", see

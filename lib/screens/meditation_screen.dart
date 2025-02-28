@@ -1,189 +1,221 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:percent_indicator/circular_percent_indicator.dart';
+import 'package:sqflite/sqflite.dart';
+import 'package:path/path.dart';
+import 'package:audioplayers/audioplayers.dart';
+import 'package:intl/intl.dart';
 
-class MeditationScreen extends StatelessWidget {
-  const MeditationScreen({Key? key}) : super(key: key);
+class MeditationScreen extends StatefulWidget {
+  @override
+  _MeditationScreenState createState() => _MeditationScreenState();
+}
+
+class _MeditationScreenState extends State<MeditationScreen> {
+  Timer? _timer;
+  int _seconds = 0;
+  bool _isRunning = false;
+  Database? _database;
+  final AudioPlayer _audioPlayer = AudioPlayer();
+  bool _isPlaying = false;
+  String _selectedSound = 'rain.mp3';
+  final List<String> _soundOptions = ['rain.mp3', 'ocean.mp3', 'forest.mp3'];
+  final List<Map<String, dynamic>> _popularMeditations = [
+    {"title": "Deep Sleep", "icon": Icons.nightlight_round},
+    {"title": "Morning Boost", "icon": Icons.wb_sunny},
+    {"title": "Stress Release", "icon": Icons.self_improvement},
+  ];
+
+  @override
+  void initState() {
+    super.initState();
+    _initDatabase();
+  }
+
+  Future<void> _initDatabase() async {
+    _database = await openDatabase(
+      join(await getDatabasesPath(), 'meditation_sessions.db'),
+      onCreate: (db, version) {
+        return db.execute(
+            'CREATE TABLE sessions(id INTEGER PRIMARY KEY AUTOINCREMENT, duration INTEGER, date TEXT)');
+      },
+      version: 1,
+    );
+  }
+
+  void _startTimer() {
+    setState(() => _isRunning = true);
+    _timer = Timer.periodic(Duration(seconds: 1), (timer) {
+      setState(() => _seconds++);
+    });
+  }
+
+  void _pauseTimer() {
+    _timer?.cancel();
+    setState(() => _isRunning = false);
+  }
+
+  void _stopTimer() {
+    _timer?.cancel();
+    setState(() {
+      _isRunning = false;
+      _seconds = 0;
+    });
+  }
+
+  void _toggleSound() async {
+    if (_isPlaying) {
+      await _audioPlayer.pause();
+    } else {
+      await _audioPlayer.play(AssetSource('sounds/$_selectedSound'));
+    }
+    setState(() => _isPlaying = !_isPlaying);
+  }
+
+  String _formatTime(int seconds) {
+    int minutes = seconds ~/ 60;
+    int secs = seconds % 60;
+    return '${minutes.toString().padLeft(2, '0')}:${secs.toString().padLeft(2, '0')}';
+  }
+
+  String _getGreeting() {
+    final hour = DateTime.now().hour;
+    if (hour < 12) return "Good Morning";
+    if (hour < 18) return "Good Afternoon";
+    return "Good Evening";
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    _audioPlayer.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: SafeArea(
-        child: SingleChildScrollView(
-          child: Padding(
-            padding: const EdgeInsets.all(16.0),
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: [Colors.teal.shade900, Colors.greenAccent.shade100],
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+          ),
+        ),
+        child: SafeArea(
+          child: SingleChildScrollView(
+            padding: EdgeInsets.all(20.0),
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Text(
-                          'Good evening, Sarah',
-                          style: TextStyle(
-                            fontSize: 24,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        Text(
-                          'Ready for your evening meditation?',
-                          style: TextStyle(
-                            color: Colors.grey[600],
-                            fontSize: 14,
-                          ),
-                        ),
-                      ],
-                    ),
-                    const CircleAvatar(
-                      radius: 20,
-                      backgroundImage: NetworkImage('https://placeholder.com/user'),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 24),
-
-                // Daily Recommendation
-                Container(
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: Colors.purple.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                  child: Row(
-                    children: [
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: const [
-                          Text(
-                            'Evening Calm',
-                            style: TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          Text(
-                            '10 min • Relaxation',
-                            style: TextStyle(
-                              color: Colors.grey,
-                              fontSize: 14,
-                            ),
-                          ),
-                          Text(
-                            '525 sessions completed',
-                            style: TextStyle(
-                              color: Colors.grey,
-                              fontSize: 12,
-                            ),
-                          ),
-                        ],
-                      ),
-                      const Spacer(),
-                      CircleAvatar(
-                        radius: 25,
-                        backgroundColor: Colors.white,
-                        child: Icon(
-                          Icons.play_arrow,
-                          color: Theme.of(context).primaryColor,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 24),
-
-                // Quick Actions Grid
-                Row(
-                  children: [
-                    Expanded(
-                      child: _buildQuickActionCard(
-                        'Breathing Exercise',
-                        'For better focus',
-                        Colors.orange[100]!,
-                      ),
-                    ),
-                    const SizedBox(width: 16),
-                    Expanded(
-                      child: _buildQuickActionCard(
-                        'Sleep Stories',
-                        'Fall asleep faster',
-                        Colors.blue[100]!,
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 16),
-                Row(
-                  children: [
-                    Expanded(
-                      child: _buildQuickActionCard(
-                        'Focus Session',
-                        'Improve concentration',
-                        Colors.green[100]!,
-                      ),
-                    ),
-                    const SizedBox(width: 16),
-                    Expanded(
-                      child: _buildQuickActionCard(
-                        'Anxiety Relief',
-                        'Calm your mind',
-                        Colors.red[100]!,
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 24),
-
-                // Popular Meditations
-                const Text(
-                  'Popular Meditations',
-                  style: TextStyle(
-                    fontSize: 18,
+                Text(
+                  _getGreeting(),
+                  style: GoogleFonts.lato(
+                    fontSize: 24,
                     fontWeight: FontWeight.bold,
+                    color: Colors.white,
                   ),
                 ),
-                const SizedBox(height: 16),
-                _buildMeditationCard(
-                  'Deep Sleep Meditation',
-                  '15 min',
-                  'Sleep',
-                  'assets/meditation1.jpg',
-                ),
-                const SizedBox(height: 12),
-                _buildMeditationCard(
-                  'Morning Energy Boost',
-                  '10 min',
-                  'Energy',
-                  'assets/meditation2.jpg',
-                ),
-                const SizedBox(height: 12),
-                _buildMeditationCard(
-                  'Stress Release',
-                  '20 min',
-                  'Anxiety',
-                  'assets/meditation3.jpg',
-                ),
-                const SizedBox(height: 24),
+                SizedBox(height: 10),
 
-                // Background Sounds
-                const Text(
-                  'Background Sounds',
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
+                CircleAvatar(
+                  radius: 40,
+                  backgroundImage: AssetImage('assets/avatar_placeholder.png'),
+                ),
+                SizedBox(height: 20),
+
+                Card(
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  color: Colors.white.withOpacity(0.2),
+                  child: ListTile(
+                    title: Text(
+                      "Today's Recommendation: Mindfulness Meditation",
+                      style: GoogleFonts.lato(color: Colors.white, fontSize: 16),
+                    ),
+                    trailing: Icon(Icons.lightbulb_outline, color: Colors.white),
                   ),
                 ),
-                const SizedBox(height: 16),
-                SingleChildScrollView(
-                  scrollDirection: Axis.horizontal,
-                  child: Row(
-                    children: [
-                      _buildSoundButton('Rain', Icons.water),
-                      _buildSoundButton('Ocean', Icons.waves),
-                      _buildSoundButton('Forest', Icons.forest),
-                      _buildSoundButton('Wind', Icons.air),
-                      _buildSoundButton('Fire', Icons.local_fire_department),
-                    ],
+                SizedBox(height: 20),
+
+                Text("Quick Actions",
+                    style: GoogleFonts.lato(fontSize: 20, fontWeight: FontWeight.w600, color: Colors.white)),
+                SizedBox(height: 10),
+                Wrap(
+                  spacing: 12,
+                  runSpacing: 12,
+                  alignment: WrapAlignment.center,
+                  children: [
+                    _quickActionButton("Breathing", Icons.air),
+                    _quickActionButton("Sleep Stories", Icons.nightlight_round),
+                    _quickActionButton("Focus Mode", Icons.center_focus_strong),
+                    _quickActionButton("Anxiety Relief", Icons.self_improvement),
+                  ],
+                ),
+                SizedBox(height: 20),
+
+                Text("Popular Meditations",
+                    style: GoogleFonts.lato(fontSize: 20, fontWeight: FontWeight.w600, color: Colors.white)),
+                SizedBox(height: 10),
+                Wrap(
+                  spacing: 12,
+                  runSpacing: 12,
+                  alignment: WrapAlignment.center,
+                  children: _popularMeditations.map((meditation) {
+                    return _meditationCard(meditation["title"], meditation["icon"]);
+                  }).toList(),
+                ),
+                SizedBox(height: 20),
+
+                CircularPercentIndicator(
+                  radius: 120.0,
+                  lineWidth: 12.0,
+                  percent: (_seconds % 60) / 60.0,
+                  center: Text(
+                    _formatTime(_seconds),
+                    style: GoogleFonts.lato(
+                      fontSize: 32,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
+                  ),
+                  progressColor: Colors.white,
+                  backgroundColor: Colors.white24,
+                  circularStrokeCap: CircularStrokeCap.round,
+                ),
+                SizedBox(height: 20),
+
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    _controlButton(Icons.play_arrow, _isRunning ? null : _startTimer),
+                    _controlButton(Icons.pause, _isRunning ? _pauseTimer : null),
+                    _controlButton(Icons.stop, _stopTimer),
+                  ],
+                ),
+                SizedBox(height: 20),
+
+                DropdownButton<String>(
+                  dropdownColor: Colors.teal.shade800,
+                  style: GoogleFonts.lato(color: Colors.white),
+                  value: _selectedSound,
+                  items: _soundOptions
+                      .map((sound) => DropdownMenuItem(
+                    child: Text(sound),
+                    value: sound,
+                  ))
+                      .toList(),
+                  onChanged: (val) => setState(() => _selectedSound = val!),
+                ),
+                SizedBox(height: 10),
+
+                ElevatedButton(
+                  onPressed: _toggleSound,
+                  style: ElevatedButton.styleFrom(backgroundColor: Colors.white.withOpacity(0.3)),
+                  child: Text(
+                    _isPlaying ? "Pause Sound" : "Play Sound",
+                    style: GoogleFonts.lato(color: Colors.white),
                   ),
                 ),
               ],
@@ -194,112 +226,40 @@ class MeditationScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildQuickActionCard(String title, String subtitle, Color color) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: color,
-        borderRadius: BorderRadius.circular(16),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            title,
-            style: const TextStyle(
-              fontWeight: FontWeight.bold,
-              fontSize: 16,
-            ),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            subtitle,
-            style: TextStyle(
-              color: Colors.grey[600],
-              fontSize: 12,
-            ),
-          ),
-        ],
-      ),
-    );
+  Widget _quickActionButton(String text, IconData icon) {
+    return _meditationCard(text, icon);
   }
 
-  Widget _buildMeditationCard(
-      String title,
-      String duration,
-      String category,
-      String imageUrl,
-      ) {
-    return Container(
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        border: Border.all(color: Colors.grey.withOpacity(0.2)),
+  Widget _meditationCard(String title, IconData icon) {
+    return Card(
+      elevation: 4,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      color: Colors.white.withOpacity(0.2),
+      child: InkWell(
         borderRadius: BorderRadius.circular(12),
-      ),
-      child: Row(
-        children: [
-          Container(
-            width: 60,
-            height: 60,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(8),
-              image: DecorationImage(
-                image: AssetImage(imageUrl),
-                fit: BoxFit.cover,
-              ),
-            ),
+        onTap: () {},
+        child: Container(
+          width: 140,
+          padding: EdgeInsets.symmetric(vertical: 16, horizontal: 12),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(icon, color: Colors.white, size: 28),
+              SizedBox(height: 8),
+              Text(title,
+                  textAlign: TextAlign.center,
+                  style: GoogleFonts.lato(color: Colors.white, fontSize: 14)),
+            ],
           ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  title,
-                  style: const TextStyle(
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                Text(
-                  '$duration • $category',
-                  style: TextStyle(
-                    color: Colors.grey[600],
-                    fontSize: 12,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          IconButton(
-            icon: const Icon(Icons.play_circle_outline),
-            onPressed: () {},
-          ),
-        ],
+        ),
       ),
     );
   }
 
-  Widget _buildSoundButton(String label, IconData icon) {
-    return Container(
-      margin: const EdgeInsets.only(right: 12),
-      child: Column(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: Colors.grey[200],
-              shape: BoxShape.circle,
-            ),
-            child: Icon(icon),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            label,
-            style: const TextStyle(fontSize: 12),
-          ),
-        ],
-      ),
+  Widget _controlButton(IconData icon, VoidCallback? onPressed) {
+    return IconButton(
+      icon: Icon(icon, size: 32, color: Colors.white),
+      onPressed: onPressed,
     );
   }
 }
-

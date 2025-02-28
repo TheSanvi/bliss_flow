@@ -41,7 +41,9 @@ class _JournalScreenState extends State<JournalScreen> {
     }
   }
 
-  Future<void> _saveJournalEntry() async {
+  void _saveJournalEntry(BuildContext context) async {
+    if (journalController.text.isEmpty) return;
+
     await _database!.insert(
       'journal',
       {
@@ -52,9 +54,21 @@ class _JournalScreenState extends State<JournalScreen> {
       },
       conflictAlgorithm: ConflictAlgorithm.replace,
     );
+
     setState(() {
       streakCount++;
     });
+
+    // Use valid BuildContext
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text("Journal entry saved!", textAlign: TextAlign.center),
+          backgroundColor: Colors.pinkAccent,
+          duration: Duration(seconds: 2),
+        ),
+      );
+    }
   }
 
   String _getReflectionPrompt() {
@@ -77,139 +91,97 @@ class _JournalScreenState extends State<JournalScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Header
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Monday',
-                        style: TextStyle(fontSize: 16, color: Colors.grey),
-                      ),
-                      Text(
-                        'February 10, 2025',
-                        style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-              SizedBox(height: 24),
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: [Color(0xFFFFC1E3), Color(0xFFFF80AB)], // Light Pink to Dark Pink
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+          ),
+        ),
+        child: SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'How are you feeling today?',
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                ),
+                SizedBox(height: 16),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  children: ['Excited', 'Happy', 'Calm', 'Sad', 'Stressed']
+                      .map((mood) => GestureDetector(
+                    onTap: () {
+                      setState(() {
+                        selectedMood = mood;
+                      });
+                    },
+                    child: Column(
+                      children: [
+                        Container(
+                          padding: EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: selectedMood == mood ? Colors.blue.shade100 : Colors.grey.shade200,
+                            shape: BoxShape.circle,
+                          ),
+                          child: Icon(Icons.sentiment_satisfied_alt, size: 24),
+                        ),
+                        SizedBox(height: 8),
+                        Text(mood),
+                      ],
+                    ),
+                  ))
+                      .toList(),
+                ),
+                SizedBox(height: 24),
 
-              // Mood Selection
-              Text('How are you feeling today?',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-              SizedBox(height: 16),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: ['Excited', 'Happy', 'Calm', 'Sad', 'Stressed']
-                    .map((mood) => GestureDetector(
-                  onTap: () {
-                    setState(() {
-                      selectedMood = mood;
-                    });
-                  },
+                Container(
+                  padding: EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.9),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
                   child: Column(
-                    children: [
-                      Container(
-                        padding: EdgeInsets.all(12),
-                        decoration: BoxDecoration(
-                          color: selectedMood == mood
-                              ? Colors.blue.shade100
-                              : Colors.grey.shade200,
-                          shape: BoxShape.circle,
-                        ),
-                        child: Icon(
-                          Icons.sentiment_satisfied_alt,
-                          size: 24,
-                        ),
-                      ),
-                      SizedBox(height: 8),
-                      Text(mood),
-                    ],
-                  ),
-                ))
-                    .toList(),
-              ),
-              SizedBox(height: 24),
-
-              // Journal Entry
-              Container(
-                padding: EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: Colors.orange[50],
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Daily Reflection',
-                      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-                    ),
-                    SizedBox(height: 8),
-                    Text(
-                      _getReflectionPrompt(),
-                      style: TextStyle(color: Colors.grey, fontSize: 14),
-                    ),
-                    TextField(
-                      controller: journalController,
-                      maxLines: 5,
-                      decoration: InputDecoration(border: InputBorder.none),
-                    ),
-                  ],
-                ),
-              ),
-              SizedBox(height: 24),
-
-              // Streak Tracking
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('Writing Stats',
-                          style: TextStyle(
-                              fontSize: 18, fontWeight: FontWeight.bold)),
+                      Text('Daily Reflection', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
                       SizedBox(height: 8),
-                      Text('Words today',
-                          style: TextStyle(color: Colors.grey, fontSize: 14)),
-                      Text('${journalController.text.split(" ").length}',
-                          style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
-                    ],
-                  ),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    children: [
-                      Row(
-                        children: [
-                          Icon(Icons.favorite, color: Colors.red, size: 16),
-                          SizedBox(width: 4),
-                          Text('$streakCount day streak',
-                              style: TextStyle(color: Colors.grey, fontSize: 14)),
-                        ],
+                      Text(_getReflectionPrompt(), style: TextStyle(color: Colors.grey, fontSize: 14)),
+                      TextField(
+                        controller: journalController,
+                        maxLines: 5,
+                        decoration: InputDecoration(border: InputBorder.none),
                       ),
                     ],
                   ),
-                ],
-              ),
-              SizedBox(height: 24),
-              Center(
-                child: ElevatedButton(
-                  onPressed: _saveJournalEntry,
-                  child: Text('Save Entry'),
                 ),
-              )
-            ],
+                SizedBox(height: 24),
+
+                // Save Entry Button with valid BuildContext
+                Center(
+                  child: ElevatedButton(
+                    onPressed: () => _saveJournalEntry(context), // Pass the correct context
+                    style: ElevatedButton.styleFrom(
+                      padding: EdgeInsets.symmetric(horizontal: 32, vertical: 12),
+                      backgroundColor: Colors.pinkAccent,
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      elevation: 5,
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(Icons.save, color: Colors.white),
+                        SizedBox(width: 8),
+                        Text('Save Entry', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white)),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),

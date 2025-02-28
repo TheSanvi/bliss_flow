@@ -75,9 +75,9 @@ class _SplashScreenState extends State<SplashScreen>
                 ScaleTransition(
                   scale: _scaleAnimation,
                   child: Lottie.asset(
-                    'assests/DALL·E 2025-02-10 14.39.23 - A cute, non-human avatar with a transparent or plain background. The character is a soft, rounded, and friendly creature with no human-like features. .png',
-                    width: 180,
-                    height: 180,
+                    'assests/Animation - 1740593647235.json', // Corrected asset path
+                    width: 400,
+                    height: 250,
                     fit: BoxFit.cover,
                   ),
                 ),

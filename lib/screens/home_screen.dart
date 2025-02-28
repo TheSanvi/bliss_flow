@@ -7,10 +7,8 @@ import 'package:bliss_flow/screens/sleep_tracking_Screen.dart';
 import 'package:flutter/material.dart';
 import 'package:bliss_flow/widgets/bottom_nav_bar.dart';
 import 'package:bliss_flow/screens/mood_screen.dart';
-
 import 'package:bliss_flow/screens/meditation_screen.dart';
-
-
+import 'package:lottie/lottie.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);
@@ -52,13 +50,21 @@ class _HomeScreenState extends State<HomeScreen> {
 class HomeScreenContent extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-      child: SingleChildScrollView(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Header
+    return Container(
+        decoration: const BoxDecoration(
+        gradient: LinearGradient(
+        colors: [Color(0xFFE8D3F5), Color(0xFFF5CBED)], // Purple Gradient
+    begin: Alignment.topCenter,
+    end: Alignment.bottomCenter,
+    ),
+    ),
+    child: SafeArea(
+    child: SingleChildScrollView(
+    padding: const EdgeInsets.all(16.0),
+    child: Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -75,9 +81,11 @@ class HomeScreenContent extends StatelessWidget {
                     ),
                   ],
                 ),
-                const CircleAvatar(
-                  radius: 20,
-                  backgroundImage: NetworkImage('https://placeholder.com/user'),
+                Lottie.asset(
+                  'assests/Animation - 1740593647235.json', // Replace with your Lottie file path
+                  width: 60,
+                  height: 60,
+                  fit: BoxFit.cover,
                 ),
               ],
             ),
@@ -106,21 +114,35 @@ class HomeScreenContent extends StatelessWidget {
             _buildQuoteCard(),
             const SizedBox(height: 24),
 
-            // Quick Actions with Navigation
+            // Quick Actions + Full-Width Lottie Animation
             _buildSectionTitle('Quick Actions'),
-            Wrap(
-              spacing: 12,
-              runSpacing: 12,
-              alignment: WrapAlignment.spaceBetween,
+            Row(
               children: [
-                _buildQuickActionCard(
-                    context, 'Journal', Icons.edit_note, 'Write your thoughts', Colors.blue,  JournalScreen()),
-                _buildQuickActionCard(
-                    context, 'Meditate', Icons.self_improvement, '10 min session', Colors.purple, const MeditationScreen()),
-                _buildQuickActionCard(
-                    context, 'Hydration', Icons.water_drop, 'Track water intake', Colors.cyan,  HydrationScreen()),
-                _buildQuickActionCard(
-                    context, 'Sleep', Icons.bedtime, 'Track sleep quality', Colors.indigo, const SleepScreen()),
+                Expanded(
+                  child: Wrap(
+                    spacing: 12,
+                    runSpacing: 12,
+                    alignment: WrapAlignment.start,
+                    children: [
+                      _buildQuickActionCard(
+                          context, 'Journal', Icons.edit_note, 'Write your thoughts', Colors.blue, JournalScreen()),
+                      _buildQuickActionCard(
+                          context, 'Meditate', Icons.self_improvement, '10 min session', Colors.purple, MeditationScreen()),
+                      _buildQuickActionCard(
+                          context, 'Hydration', Icons.water_drop, 'Track water intake', Colors.cyan, HydrationScreen()),
+                      _buildQuickActionCard(
+                          context, 'Sleep', Icons.bedtime, 'Track sleep quality', Colors.indigo, SleepScreen()),
+                    ],
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Lottie.asset(
+                    'assests/Animation - 1740595749959.json', // Your Lottie animation for full right space
+                    height: 180,
+                    fit: BoxFit.cover,
+                  ),
+                ),
               ],
             ),
             const SizedBox(height: 24),
@@ -133,17 +155,28 @@ class HomeScreenContent extends StatelessWidget {
           ],
         ),
       ),
+    )
     );
   }
 
-  // ✅ Navigation Functionality Added
+  // ✅ Mood Icon Widget
+  Widget _buildMoodIcon(String emoji, String label) {
+    return Column(
+      children: [
+        Text(emoji, style: const TextStyle(fontSize: 28)),
+        const SizedBox(height: 4),
+        Text(label, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w500)),
+      ],
+    );
+  }
+
+  // ✅ Quick Action Card with Navigation
   Widget _buildQuickActionCard(BuildContext context, String title, IconData icon, String subtitle, Color color, Widget screen) {
     return GestureDetector(
       onTap: () {
         Navigator.push(context, MaterialPageRoute(builder: (context) => screen));
       },
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 300),
+      child: Container(
         width: 160,
         padding: const EdgeInsets.all(16),
         decoration: _containerDecoration(color.withOpacity(0.1)),
@@ -160,40 +193,15 @@ class HomeScreenContent extends StatelessWidget {
     );
   }
 
-  // Section Title
+  // ✅ Section Title
   Widget _buildSectionTitle(String title) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 8),
-      child: Text(
-        title,
-        style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-      ),
+      child: Text(title, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
     );
   }
 
-  // Mood Icons
-  Widget _buildMoodIcon(String emoji, String label) {
-    return Column(
-      children: [
-        AnimatedContainer(
-          duration: const Duration(milliseconds: 300),
-          padding: const EdgeInsets.all(10),
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            color: Colors.white,
-            boxShadow: [
-              BoxShadow(color: Colors.black.withOpacity(0.1), blurRadius: 6, offset: const Offset(0, 3)),
-            ],
-          ),
-          child: Text(emoji, style: const TextStyle(fontSize: 24)),
-        ),
-        const SizedBox(height: 4),
-        Text(label, style: const TextStyle(fontSize: 12)),
-      ],
-    );
-  }
-
-  // Overview Card
+  // ✅ Overview Card
   Widget _buildOverviewCard(String title, String value, IconData icon, Color color) {
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 6),
@@ -219,7 +227,7 @@ class HomeScreenContent extends StatelessWidget {
     );
   }
 
-  // Quote Card
+  // ✅ Quote Card
   Widget _buildQuoteCard() {
     return Container(
       padding: const EdgeInsets.all(16),
@@ -238,14 +246,11 @@ class HomeScreenContent extends StatelessWidget {
     );
   }
 
-  // Common Container Decoration
+  // ✅ Container Decoration
   BoxDecoration _containerDecoration(Color color) {
     return BoxDecoration(
       color: color,
       borderRadius: BorderRadius.circular(16),
-      boxShadow: [
-        BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 6, offset: const Offset(0, 3)),
-      ],
     );
   }
 }
