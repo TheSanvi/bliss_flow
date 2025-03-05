@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:fl_chart/fl_chart.dart';
+import 'package:syncfusion_flutter_charts/charts.dart';
 
 class HydrationScreen extends StatefulWidget {
   @override
@@ -11,14 +11,15 @@ class _HydrationScreenState extends State<HydrationScreen> {
   int currentWaterIntake = 1200;
   int goal = 2000;
 
-  List<int> pastDaysData = [1500, 1800, 1200, 2000, 1700]; // Last 5 days
+  List<int> pastDaysData = [1500, 1800, 1200, 2000, 1700];
+  final List<String> days = ["Mon", "Tue", "Wed", "Thu", "Fri"];
 
   @override
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
         gradient: LinearGradient(
-          colors: [Color(0xFFa8c0ff), Color(0xFF3f2b96)],
+          colors: [Color(0xff80bdff), Color(0xff84cfe1)],
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
         ),
@@ -27,29 +28,25 @@ class _HydrationScreenState extends State<HydrationScreen> {
         child: Scaffold(
           backgroundColor: Colors.transparent,
           body: SingleChildScrollView(
-            child: Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  SizedBox(height: 20),
-                  Text("BlissFlow",
-                      style: GoogleFonts.poppins(
-                          fontSize: 24, fontWeight: FontWeight.bold, color: Colors.white)),
-                  SizedBox(height: 20),
-                  _buildWaterProgress(),
-                  SizedBox(height: 20),
-                  _buildWaterButtons(),
-                  SizedBox(height: 20),
-                  _buildResetButton(),
-                  SizedBox(height: 20),
-                  _buildStreakSection(),
-                  SizedBox(height: 20),
-                  _buildHistoryChart(),
-                  SizedBox(height: 20),
-                  _buildAchievementsSection(),
-                ],
-              ),
+            padding: EdgeInsets.all(16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                SizedBox(height: 20),
+                Text("BlissFlow",
+                    style: GoogleFonts.poppins(
+                        fontSize: 28, fontWeight: FontWeight.bold, color: Colors.white)),
+                SizedBox(height: 20),
+                _buildWaterProgress(),
+                SizedBox(height: 20),
+                _buildWaterButtons(),
+                SizedBox(height: 20),
+                _buildResetButton(),
+                SizedBox(height: 20),
+                _buildHistoryChart(),  // Syncfusion Chart ✅
+                SizedBox(height: 20),
+                _buildAchievementsSection(),
+              ],
             ),
           ),
         ),
@@ -58,20 +55,36 @@ class _HydrationScreenState extends State<HydrationScreen> {
   }
 
   Widget _buildWaterProgress() {
-    double percentage = (currentWaterIntake / goal) * 100;
+    double percentage = (currentWaterIntake / goal).clamp(0, 1);
     return Column(
       children: [
         Text("$currentWaterIntake ml / $goal ml",
             style: GoogleFonts.poppins(fontSize: 18, color: Colors.white)),
         SizedBox(height: 10),
-        LinearProgressIndicator(
-          value: currentWaterIntake / goal,
-          backgroundColor: Colors.white.withOpacity(0.3),
-          color: Colors.blueAccent,
-          minHeight: 10,
+        Stack(
+          children: [
+            Container(
+              height: 18,
+              width: double.infinity,
+              decoration: BoxDecoration(
+                color: Colors.white.withOpacity(0.2),
+                borderRadius: BorderRadius.circular(10),
+              ),
+            ),
+            FractionallySizedBox(
+              widthFactor: percentage,
+              child: Container(
+                height: 18,
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(colors: [Colors.blueAccent, Colors.lightBlue]),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+              ),
+            ),
+          ],
         ),
         SizedBox(height: 10),
-        Text("${percentage.toStringAsFixed(1)}% of daily goal",
+        Text("${(percentage * 100).toStringAsFixed(1)}% of daily goal",
             style: GoogleFonts.poppins(fontSize: 14, color: Colors.white70)),
       ],
     );
@@ -86,7 +99,7 @@ class _HydrationScreenState extends State<HydrationScreen> {
           child: ElevatedButton(
             onPressed: () {
               setState(() {
-                currentWaterIntake += amount;
+                currentWaterIntake = (currentWaterIntake + amount).clamp(0, goal);
               });
             },
             style: ElevatedButton.styleFrom(
@@ -115,30 +128,6 @@ class _HydrationScreenState extends State<HydrationScreen> {
     );
   }
 
-  Widget _buildStreakSection() {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-      children: [
-        _buildStreakBox("Current Streak", "7 Days"),
-        _buildStreakBox("Best Record", "14 Days"),
-      ],
-    );
-  }
-
-  Widget _buildStreakBox(String title, String value) {
-    return Container(
-      padding: EdgeInsets.all(12),
-      decoration: BoxDecoration(color: Colors.white.withOpacity(0.2), borderRadius: BorderRadius.circular(12)),
-      child: Column(
-        children: [
-          Text(title, style: GoogleFonts.poppins(fontSize: 14, color: Colors.white70)),
-          SizedBox(height: 5),
-          Text(value, style: GoogleFonts.poppins(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white)),
-        ],
-      ),
-    );
-  }
-
   Widget _buildHistoryChart() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -147,50 +136,23 @@ class _HydrationScreenState extends State<HydrationScreen> {
         SizedBox(height: 10),
         Container(
           height: 200,
-          child: BarChart(
-            BarChartData(
-              alignment: BarChartAlignment.spaceAround,
-              barGroups: pastDaysData.asMap().entries.map((entry) {
-                int index = entry.key;
-                int value = entry.value;
-                return BarChartGroupData(
-                  x: index,
-                  barRods: [
-                    BarChartRodData(
-                      toY: value.toDouble(),
-                      color: Colors.blueAccent,
-                      width: 20,
-                      borderRadius: BorderRadius.circular(6),
-                    ),
-                  ],
-                );
-              }).toList(),
-              titlesData: FlTitlesData(
-                leftTitles: AxisTitles(
-                  sideTitles: SideTitles(
-                    showTitles: true,
-                    interval: 500,
-                    reservedSize: 30,
-                    getTitlesWidget: (value, meta) {
-                      return Text('${value.toInt()} ml',
-                          style: GoogleFonts.poppins(fontSize: 12, color: Colors.white));
-                    },
-                  ),
-                ),
-                bottomTitles: AxisTitles(
-                  sideTitles: SideTitles(
-                    showTitles: true,
-                    getTitlesWidget: (value, meta) {
-                      List<String> days = ["Mon", "Tue", "Wed", "Thu", "Fri"];
-                      return Text(days[value.toInt()],
-                          style: GoogleFonts.poppins(fontSize: 12, color: Colors.white));
-                    },
-                  ),
-                ),
+          padding: EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            color: Colors.white.withOpacity(0.2),
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: SfCartesianChart(
+            primaryXAxis: CategoryAxis(),
+            primaryYAxis: NumericAxis(),
+            series: <CartesianSeries>[
+              ColumnSeries<_ChartData, String>(  // ✅ Correct Type Used
+                dataSource: _getChartData(),
+                xValueMapper: (_ChartData data, _) => data.day,
+                yValueMapper: (_ChartData data, _) => data.waterIntake,
+                borderRadius: BorderRadius.circular(6),
+                color: Colors.lightBlueAccent,
               ),
-              borderData: FlBorderData(show: false),
-              gridData: FlGridData(show: true, drawVerticalLine: false),
-            ),
+            ],
           ),
         ),
       ],
@@ -203,17 +165,28 @@ class _HydrationScreenState extends State<HydrationScreen> {
       children: [
         Text("Achievements", style: GoogleFonts.poppins(fontSize: 16, color: Colors.white)),
         SizedBox(height: 10),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        Wrap(
+          spacing: 10,
           children: ["Hydration Hero", "Perfect Week", "Early Bird"].map((achievement) {
-            return Container(
-              padding: EdgeInsets.all(10),
-              decoration: BoxDecoration(color: Colors.white.withOpacity(0.2), borderRadius: BorderRadius.circular(12)),
-              child: Text(achievement, style: GoogleFonts.poppins(fontSize: 14, color: Colors.white)),
+            return Chip(
+              backgroundColor: Colors.white.withOpacity(0.2),
+              label: Text(achievement, style: GoogleFonts.poppins(fontSize: 14, color: Colors.white)),
             );
           }).toList(),
         ),
       ],
     );
   }
+
+  List<_ChartData> _getChartData() {
+    return List.generate(pastDaysData.length, (index) {
+      return _ChartData(days[index], pastDaysData[index]);
+    });
+  }
+}
+
+class _ChartData {
+  final String day;
+  final int waterIntake;
+  _ChartData(this.day, this.waterIntake);
 }
