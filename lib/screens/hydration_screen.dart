@@ -190,3 +190,5 @@ class _ChartData {
   final int waterIntake;
   _ChartData(this.day, this.waterIntake);
 }
+
+
