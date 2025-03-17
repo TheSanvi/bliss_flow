@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({Key? key}) : super(key: key);
@@ -9,7 +10,22 @@ class ProfileScreen extends StatefulWidget {
 
 class _ProfileScreenState extends State<ProfileScreen> {
   String username = "Your Name";
+  String age = "Your Age";
   String bio = "Write something about yourself...";
+
+  @override
+  void initState() {
+    super.initState();
+    _loadUserData();
+  }
+
+  void _loadUserData() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    setState(() {
+      username = prefs.getString('user_name') ?? "Your Name";
+      age = prefs.getInt('user_age')?.toString() ?? "Your Age";
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -33,18 +49,22 @@ class _ProfileScreenState extends State<ProfileScreen> {
               ),
             ),
             const SizedBox(height: 16),
-            TextField(
-              decoration: InputDecoration(
-                labelText: "Username",
-                border: OutlineInputBorder(),
-              ),
-              onChanged: (value) {
-                setState(() {
-                  username = value;
-                });
-              },
+
+            // Display Username
+            Text(
+              username,
+              style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
             ),
-            const SizedBox(height: 12),
+
+            // Display Age
+            Text(
+              "Age: $age",
+              style: TextStyle(fontSize: 18, color: Colors.grey[700]),
+            ),
+
+            const SizedBox(height: 16),
+
+            // Editable Bio Field
             TextField(
               decoration: InputDecoration(
                 labelText: "Bio",
@@ -56,7 +76,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 });
               },
             ),
+
             const SizedBox(height: 20),
+
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
@@ -75,6 +97,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               ],
             ),
             const SizedBox(height: 24),
+
             ElevatedButton(
               onPressed: () {
                 // Save profile functionality

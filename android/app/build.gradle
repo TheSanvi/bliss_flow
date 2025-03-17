@@ -1,44 +1,72 @@
 plugins {
-    id "com.android.application"
-    id "kotlin-android"
+    id 'com.android.application'
+    id 'org.jetbrains.kotlin.android'
     // The Flutter Gradle Plugin must be applied after the Android and Kotlin Gradle plugins.
-    id "dev.flutter.flutter-gradle-plugin"
+    id 'dev.flutter.flutter-gradle-plugin'
 }
 
 android {
-    namespace = "com.example.bliss_flow"
-    compileSdk = flutter.compileSdkVersion
+    namespace = "com.example.bliss_flow" // Replace with your actual package name
+    compileSdk 35 // Or the latest stable SDK version. Use flutter.compileSdkVersion if needed
     ndkVersion = flutter.ndkVersion
 
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
     }
 
     kotlinOptions {
-        jvmTarget = JavaVersion.VERSION_1_8
+        jvmTarget = '17'
     }
 
     defaultConfig {
         // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
-        applicationId = "com.example.bliss_flow"
+        applicationId = "com.example.bliss_flow" // Replace with your actual package name
         // You can update the following values to match your application needs.
         // For more information, see: https://flutter.dev/to/review-gradle-config.
-        minSdk = flutter.minSdkVersion
-        targetSdk = flutter.targetSdkVersion
+        // For more information, see: https://flutter.dev/to/review-gradle-config.
+        minSdk 21 // Or your minimum supported SDK version. Use flutter.minSdkVersion if needed
+        targetSdk 34 // Or the latest stable SDK version. Use flutter.targetSdkVersion if needed
         versionCode = flutter.versionCode
         versionName = flutter.versionName
+
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 
     buildTypes {
         release {
             // TODO: Add your own signing config for the release build.
             // Signing with the debug keys for now, so `flutter run --release` works.
-            signingConfig = signingConfigs.debug
+            signingConfig signingConfigs.debug
+            minifyEnabled true // Enable code shrinking
+            shrinkResources true // Enable resource shrinking
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
+        debug {
+            applicationIdSuffix ".debug" // Useful for having separate debug and release apps
+        }
+    }
+    buildFeatures {
+        viewBinding true // Or dataBinding = true if you use that
     }
 }
 
 flutter {
-    source = "../.."
+    source = "../../.."
+}
+
+dependencies {
+
+    implementation "androidx.core:core-ktx:1.10.1" // Or the latest stable version
+    implementation "androidx.lifecycle:lifecycle-runtime-ktx:2.6.1" // Or the latest stable version
+    implementation "androidx.appcompat:appcompat:1.6.1" // Or the latest stable version
+    implementation "com.google.android.material:material:1.9.0" // Or the latest stable version
+    implementation "androidx.constraintlayout:constraintlayout:2.1.4" // Or the latest stable version
+    testImplementation 'junit:junit:4.13.2'
+    androidTestImplementation 'androidx.test.ext:junit:1.1.5'
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.1'
+
+    // Add any other dependencies your project needs here
+    // Example:
+    // implementation 'com.squareup.okhttp3:okhttp:4.11.0'
 }

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:sqflite/sqflite.dart';
-import 'package:path/path.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'dart:convert';
 
 class JournalScreen extends StatefulWidget {
   @override
@@ -8,7 +8,6 @@ class JournalScreen extends StatefulWidget {
 }
 
 class _JournalScreenState extends State<JournalScreen> {
-  Database? _database;
   String selectedMood = "Happy";
   int streakCount = 0;
   TextEditingController journalController = TextEditingController();
@@ -16,50 +15,36 @@ class _JournalScreenState extends State<JournalScreen> {
   @override
   void initState() {
     super.initState();
-    _initDatabase();
-  }
-
-  Future<void> _initDatabase() async {
-    _database = await openDatabase(
-      join(await getDatabasesPath(), 'journal.db'),
-      onCreate: (db, version) {
-        return db.execute(
-          "CREATE TABLE journal(id INTEGER PRIMARY KEY, mood TEXT, entry TEXT, date TEXT, streak INTEGER)",
-        );
-      },
-      version: 1,
-    );
     _loadStreak();
   }
 
   Future<void> _loadStreak() async {
-    final List<Map<String, dynamic>> maps = await _database!.query('journal');
-    if (maps.isNotEmpty) {
-      setState(() {
-        streakCount = maps.last['streak'] ?? 0;
-      });
-    }
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      streakCount = prefs.getInt('streakCount') ?? 0;
+    });
   }
 
-  void _saveJournalEntry(BuildContext context) async {
+  Future<void> _saveJournalEntry(BuildContext context) async {
     if (journalController.text.isEmpty) return;
+    final prefs = await SharedPreferences.getInstance();
 
-    await _database!.insert(
-      'journal',
-      {
-        'mood': selectedMood,
-        'entry': journalController.text,
-        'date': DateTime.now().toString(),
-        'streak': streakCount + 1,
-      },
-      conflictAlgorithm: ConflictAlgorithm.replace,
-    );
+    List<String> journalEntries = prefs.getStringList('journalEntries') ?? [];
+    Map<String, dynamic> newEntry = {
+      'mood': selectedMood,
+      'entry': journalController.text,
+      'date': DateTime.now().toString(),
+      'streak': streakCount + 1,
+    };
+
+    journalEntries.add(jsonEncode(newEntry));
+    await prefs.setStringList('journalEntries', journalEntries);
+    await prefs.setInt('streakCount', streakCount + 1);
 
     setState(() {
       streakCount++;
     });
 
-    // Use valid BuildContext
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -94,7 +79,7 @@ class _JournalScreenState extends State<JournalScreen> {
       body: Container(
         decoration: BoxDecoration(
           gradient: LinearGradient(
-            colors: [Color(0xFFFFC1E3), Color(0xFFFF80AB)], // Light Pink to Dark Pink
+            colors: [Color(0xFFFFC1E3), Color(0xFFFF80AB)],
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
           ),
@@ -124,10 +109,13 @@ class _JournalScreenState extends State<JournalScreen> {
                         Container(
                           padding: EdgeInsets.all(12),
                           decoration: BoxDecoration(
-                            color: selectedMood == mood ? Colors.blue.shade100 : Colors.grey.shade200,
+                            color: selectedMood == mood
+                                ? Colors.blue.shade100
+                                : Colors.grey.shade200,
                             shape: BoxShape.circle,
                           ),
-                          child: Icon(Icons.sentiment_satisfied_alt, size: 24),
+                          child:
+                          Icon(Icons.sentiment_satisfied_alt, size: 24),
                         ),
                         SizedBox(height: 8),
                         Text(mood),
@@ -137,7 +125,6 @@ class _JournalScreenState extends State<JournalScreen> {
                       .toList(),
                 ),
                 SizedBox(height: 24),
-
                 Container(
                   padding: EdgeInsets.all(16),
                   decoration: BoxDecoration(
@@ -147,9 +134,12 @@ class _JournalScreenState extends State<JournalScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('Daily Reflection', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                      Text('Daily Reflection',
+                          style: TextStyle(
+                              fontWeight: FontWeight.bold, fontSize: 16)),
                       SizedBox(height: 8),
-                      Text(_getReflectionPrompt(), style: TextStyle(color: Colors.grey, fontSize: 14)),
+                      Text(_getReflectionPrompt(),
+                          style: TextStyle(color: Colors.grey, fontSize: 14)),
                       TextField(
                         controller: journalController,
                         maxLines: 5,
@@ -159,15 +149,15 @@ class _JournalScreenState extends State<JournalScreen> {
                   ),
                 ),
                 SizedBox(height: 24),
-
-                // Save Entry Button with valid BuildContext
                 Center(
                   child: ElevatedButton(
-                    onPressed: () => _saveJournalEntry(context), // Pass the correct context
+                    onPressed: () => _saveJournalEntry(context),
                     style: ElevatedButton.styleFrom(
-                      padding: EdgeInsets.symmetric(horizontal: 32, vertical: 12),
+                      padding:
+                      EdgeInsets.symmetric(horizontal: 32, vertical: 12),
                       backgroundColor: Colors.pinkAccent,
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12)),
                       elevation: 5,
                     ),
                     child: Row(
@@ -175,7 +165,11 @@ class _JournalScreenState extends State<JournalScreen> {
                       children: [
                         Icon(Icons.save, color: Colors.white),
                         SizedBox(width: 8),
-                        Text('Save Entry', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white)),
+                        Text('Save Entry',
+                            style: TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white)),
                       ],
                     ),
                   ),

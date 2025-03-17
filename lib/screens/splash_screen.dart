@@ -1,7 +1,8 @@
-import 'package:bliss_flow/screens/UserDetailsScreen.dart';
 import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
-import 'package:bliss_flow/screens/home_screen.dart'; // Ensure this import is correct
+import 'package:shared_preferences/shared_preferences.dart';
+import 'home_screen.dart';
+import 'user_info_screen.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({Key? key}) : super(key: key);
@@ -29,13 +30,21 @@ class _SplashScreenState extends State<SplashScreen>
 
     _controller.forward();
 
-    // Navigate to HomeScreen after 3 seconds
-    Future.delayed(const Duration(seconds: 3), () {
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => HomeScreen()),
-      );
-    });
+    // Check if user data exists
+    _checkUserInfo();
+  }
+
+  void _checkUserInfo() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    bool hasUserInfo = prefs.containsKey('user_name') && prefs.containsKey('user_age');
+
+    await Future.delayed(const Duration(seconds: 3));
+
+    if (hasUserInfo) {
+      Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => HomeScreen()));
+    } else {
+      Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => UserInfoScreen()));
+    }
   }
 
   @override
@@ -75,7 +84,7 @@ class _SplashScreenState extends State<SplashScreen>
                 ScaleTransition(
                   scale: _scaleAnimation,
                   child: Lottie.asset(
-                    'assests/Animation - 1740593647235.json', // Corrected asset path
+                    'assests/Animation - 1740593647235.json', // Ensure correct asset path
                     width: 400,
                     height: 250,
                     fit: BoxFit.cover,
